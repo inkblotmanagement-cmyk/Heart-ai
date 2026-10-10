@@ -1,0 +1,5 @@
+# JMGL pinned to an exact commit on main (PR #7 merge, 2026-10-10). The [model]
+# extra adds numpy + fastembed for the learned classifier; without it Heart AI
+# falls back to the rules-only engine. See README to pin a Grace Force build.
+jmgl[model] @ git+https://github.com/inkblotmanagement-cmyk/JacksonMoralGovernanceLayer@0b7e0090257d75be4a4e12a7c54f7fff4206a86b
+streamlit>=1.38,<2

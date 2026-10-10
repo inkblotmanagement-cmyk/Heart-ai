@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      FASTEMBED_CACHE_PATH: /tmp/fastembed_cache
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Cache embedding model
+        uses: actions/cache@v4
+        with:
+          path: /tmp/fastembed_cache
+          key: fastembed-bge-small-v1
+      - name: Install
+        run: pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check .
+      - name: Tests
+        run: python -m pytest -q
+      - name: Streamlit smoke test
+        run: |
+          streamlit run app.py --server.headless true --server.port 8501 &
+          for i in $(seq 1 60); do curl -fsS http://localhost:8501/_stcore/health && break; sleep 2; done
+          curl -fsS http://localhost:8501/_stcore/health | grep -q ok
