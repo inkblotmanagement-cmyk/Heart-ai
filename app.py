@@ -49,7 +49,7 @@ with tab_check:
                             help="JMGL judges the whole task, so harm split across turns is still caught (JL-10).")
     c1, c2 = st.columns(2)
     rules_only = c1.checkbox("Rules-only mode (turn off the learned classifier)", value=False)
-    use_grace = c2.checkbox("Use the Grace Force 0.7 gate when installed", value=H.grace_available(),
+    use_grace = c2.checkbox("Use the Grace Force 0.7 gate (on by default)", value=H.grace_available(),
                             disabled=not H.grace_available())
 
     if st.button("Evaluate with JMGL", type="primary"):
@@ -79,6 +79,8 @@ with tab_check:
                 st.caption(f"Underlying ensemble said {r.ensemble_decision}; the Grace gate set the final decision.")
 
             st.markdown("**Laws triggered**")
+            if r.laws_via_classifier:
+                st.caption("No keyword law fired. The law below is the one matching the learned classifier's category.")
             if r.laws:
                 for law in r.laws:
                     st.markdown(f"- **{law['id']}**: {law['statement']}")
@@ -124,19 +126,40 @@ MODIFY, or ESCALATE with the reason.
 **What it is not:** it is **not AGI or artificial superintelligence**, and no model here has absorbed the
 10 Keys. It is a pilot-stage safety filter with known error rates.
 
-**Published results for the pinned JMGL version** (JMGL `eval/ACCURACY_REPORT.md`, ensemble v0.4):
+**Published results for the pinned JMGL version** (JMGL commit `9d0eeed`, all on held-out test sets
+that were not used for tuning).
+
+*Grace Force 0.7 gate* ([`eval/GRACE_FORCE_REPORT.md`](https://github.com/inkblotmanagement-cmyk/JacksonMoralGovernanceLayer/blob/9d0eeed61ac4045f67549e604ce75ec484870cf7/eval/GRACE_FORCE_REPORT.md)). Pass or fail at the
+0.7 line uses **harm + confidence only**. Benefit and flourishing are word-based estimates, shown but never decisive.
 
 | test set | cases | accuracy | harmful let through | safe requests flagged |
 |---|---|---|---|---|
-| held-out, template-disjoint | 21,722 | 88.1% | 1.8% | 28.3% |
-| fresh paraphrases | 66 | 89.4% | 2.4% | 24.0% |
-| fresh hand-written, harder | 46 | 73.9% | 37.0% | 0.0% |
+| template-disjoint held-out (sample) | 3,000 | 92.9% | 0.5% | 5.8% |
+| fresh paraphrases | 66 | 95.5% | 0.0% | 4.0% |
+| self-harm / consent (pre-registered) | 55 | 94.5% | 0.0% | 11.8% |
+| fresh hand-written, harder | 46 | 73.9% | **19.6%** | 0.0% |
 
-The Grace Force 0.7 gate (JMGL `eval/GRACE_FORCE_REPORT.md`) is still under review and is not in the pinned
-version; Heart AI uses it automatically when it is installed.
+On the hardest hand-written set, the harm-only gate let more harm through (13.0% before, 19.6% now). Before,
+low benefit scores were hiding the classifier's misses on veiled harm. The weakness is real and is still open.
+
+- Laundering harm through the rewrite path: **0 of 15** (original red team) and **0 of 25** (new red team).
+- Multi-turn setups (30 cases): **all 20** harmful setups caught; 1 of 10 safe conversations flagged (10%).
+- Stability: scores are fully repeatable; light edits (typos, casing, synonyms) flip the decision **1.11%** of the time.
+
+*Underlying ensemble v0.7.1* ([`eval/ACCURACY_REPORT.md`](https://github.com/inkblotmanagement-cmyk/JacksonMoralGovernanceLayer/blob/9d0eeed61ac4045f67549e604ce75ec484870cf7/eval/ACCURACY_REPORT.md)):
+
+| test set | cases | accuracy | harmful let through | safe requests flagged |
+|---|---|---|---|---|
+| held-out, template-disjoint | 21,722 | 95.9% | 1.7% | 5.5% |
+| fresh paraphrases | 66 | 97.0% | 0.0% | 4.0% |
+| fresh hand-written, harder | 46 | 76.1% | 28.3% | 0.0% |
+
+The 0.7 line is an operating point chosen to catch as much harm as possible. It is not a validated measure of
+ethics.
 
 **Limits you should know:**
-- All of JMGL's test data was written by AI, not labeled by people. A human-labeling study with staff is pending.
+- All of JMGL's test data was written by AI, not labeled by people. A human-labeling study with staff is pending,
+  so none of these numbers has been checked by people yet.
 - It makes mistakes both ways. It can block safe requests and miss subtle, veiled harm.
 - **Human review is required** for any decision that affects a real person.
 - If you or someone you know is in crisis, call or text **988** in the US.

@@ -18,8 +18,9 @@ and shows which of the **10 Keys** the decision reflects.
 2. Heart AI runs it through the real JMGL engine: 11 written laws (JL-00..JL-10) plus a small learned
    classifier (`evaluate_action_ensemble`). If the classifier can't load, it falls back to the rules-only
    engine and says so on screen.
-3. If the installed JMGL includes the **Grace Force** gate (`evaluate_grace_force`), Heart AI also shows the
-   gate score against the **0.7** line. If it doesn't, the ensemble verdict is final and the app says so.
+3. The **Grace Force** gate (`evaluate_grace_force`) is on by default. It decides pass or fail at the **0.7** line
+   from harm + confidence only, and Heart AI shows the gate score against that line. You can turn it off, or use
+   rules-only mode, to compare.
 4. You see the decision (**ALLOW / BLOCK / MODIFY / ESCALATE**), the laws triggered with their text, the
    classifier's confidence, any safer rewrite, crisis resources (988) when a person may be in crisis, the
    engine mode, and a **Keys reflection**.
@@ -49,19 +50,48 @@ reading of the laws and is open to the founder's revision.
 
 ## Published results (pinned JMGL version)
 
-From JMGL [`eval/ACCURACY_REPORT.md`](https://github.com/inkblotmanagement-cmyk/JacksonMoralGovernanceLayer/blob/0b7e0090257d75be4a4e12a7c54f7fff4206a86b/eval/ACCURACY_REPORT.md)
-(ensemble v0.4, the version pinned in `requirements.txt`):
+`requirements.txt` pins JMGL commit [`9d0eeed`](https://github.com/inkblotmanagement-cmyk/JacksonMoralGovernanceLayer/commit/9d0eeed61ac4045f67549e604ce75ec484870cf7)
+(the merge of JMGL PR #8, Grace Force 0.7.1). Every number below is on a held-out set that was not used for tuning.
+
+**Grace Force 0.7 gate** ([`eval/GRACE_FORCE_REPORT.md`](https://github.com/inkblotmanagement-cmyk/JacksonMoralGovernanceLayer/blob/9d0eeed61ac4045f67549e604ce75ec484870cf7/eval/GRACE_FORCE_REPORT.md)). Pass or fail uses
+harm + confidence only. Human benefit and long-term flourishing are word-based estimates, reported but never decisive.
 
 | test set | cases | accuracy | harmful let through | safe requests flagged |
 |---|---|---|---|---|
-| held-out, template-disjoint | 21,722 | 88.1% | 1.8% | 28.3% |
-| fresh paraphrases | 66 | 89.4% | 2.4% | 24.0% |
-| fresh hand-written, harder | 46 | 73.9% | 37.0% | 0.0% |
+| template-disjoint held-out (sample) | 3,000 | 92.9% | 0.5% | 5.8% |
+| fresh paraphrases | 66 | 95.5% | 0.0% | 4.0% |
+| self-harm / consent (pre-registered) | 55 | 94.5% | 0.0% | 11.8% |
+| fresh hand-written, harder | 46 | 73.9% | **19.6%** | 0.0% |
 
-**Limits:** all test data was written by AI, not labeled by people (a staff human-labeling study is pending);
-the engine makes mistakes both ways; it is weakest on subtle, veiled harm. In this pinned version, two of
-the app's own examples come out wrong: the scam-awareness lesson is blocked (a false positive) and the
-multi-turn stalking example is allowed (a miss). The Grace Force build below gets both right in local testing.
+- **Trade-off:** on the hardest hand-written set, switching to the harm-only gate let more harm through
+  (13.0% before, 19.6% now). Before, low benefit/flourishing scores happened to push veiled-harm items below 0.7,
+  hiding the classifier's misses. That weakness is real and is still open.
+- **Laundering through the rewrite path:** 0 of 15 (original red team) and 0 of 25 (new red team, written before tuning).
+- **Rewrite log:** 72 cases entered the rewrite path, and every rewrite changed the decision. None just rephrased a harmful request.
+- **Multi-turn** (30 pre-registered cases): all 20 harmful setups caught; 1 of 10 safe conversations flagged (10%).
+- **Stability:** scores are fully repeatable; light edits flip the decision 1.11% of the time (10 of 900).
+
+**Underlying ensemble v0.7.1** ([`eval/ACCURACY_REPORT.md`](https://github.com/inkblotmanagement-cmyk/JacksonMoralGovernanceLayer/blob/9d0eeed61ac4045f67549e604ce75ec484870cf7/eval/ACCURACY_REPORT.md)):
+
+| test set | cases | accuracy | harmful let through | safe requests flagged |
+|---|---|---|---|---|
+| held-out, template-disjoint | 21,722 | 95.9% | 1.7% | 5.5% |
+| held-out, random split | 16,331 | 96.1% | 1.8% | 5.9% |
+| fresh paraphrases | 66 | 97.0% | 0.0% | 4.0% |
+| fresh hand-written, harder | 46 | 76.1% | 28.3% | 0.0% |
+
+**Limits:**
+- All test data was written by AI, not labeled by people. A staff human-labeling study is pending, so none of these
+  numbers has been checked by people yet.
+- The 0.7 line is an operating point chosen to catch as much harm as possible. It is not a validated measure of ethics.
+- The engine still makes mistakes both ways and is weakest on subtle, veiled harm.
+
+**The app's own examples on this pin:** all 10 come out as labeled. The two that the previous pin got wrong are now
+right. The scam-awareness lesson is ALLOWED (gate 1.00), and the multi-turn stalking example is BLOCKED by the learned
+classifier (gate 0.27). No keyword law fires, so the app names JL-10, the law that matches the classifier's
+`multiturn` category, and says so on screen. Tests check both. In **rules-only mode** both are still wrong (BLOCK and ALLOW), which shows
+why the classifier matters. One small quirk: the pump-and-dump example is blocked under JL-01 (deception) rather than
+JL-07 (market manipulation).
 
 ## Quickstart
 
@@ -77,17 +107,10 @@ Tests: `pip install -r requirements-dev.txt && pytest -q`
 
 Docker: `docker build -t heart-ai . && docker run -p 8501:8501 heart-ai`
 
-### Using a Grace Force build of JMGL
+### Updating JMGL
 
-Grace Force is still under review in JMGL and isn't in the pinned version. To try it once that branch is on
-GitHub, change the JMGL line in `requirements.txt` to the branch or, better, an exact commit on it:
-
-```
-jmgl[model] @ git+https://github.com/inkblotmanagement-cmyk/JacksonMoralGovernanceLayer@grace-force-0.7
-```
-
-Heart AI detects it automatically and shows the gate score vs 0.7. After the JMGL pull request is merged,
-pin to the merge commit on `main` instead.
+Grace Force ships in the pinned commit, so nothing extra is needed. To move to a newer JMGL, change the commit in
+`requirements.txt` to another commit on JMGL `main`, then rerun `pytest -q`.
 
 ## Files
 

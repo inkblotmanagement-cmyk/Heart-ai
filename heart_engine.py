@@ -32,6 +32,15 @@ FALLBACK_RESOURCES = [
 ]
 
 
+# Learned-classifier category -> the JMGL law it corresponds to. Used only when the
+# classifier (rule id JL-ML) flagged harm that no keyword law matched.
+CATEGORY_TO_LAW: dict[str, str] = {
+    "phishing": "JL-01", "creds": "JL-02", "elderfin": "JL-03", "stalking": "JL-04",
+    "jailbreak": "JL-05", "hiring": "JL-06", "pumpdump": "JL-07", "selfharm": "JL-08",
+    "authclaim": "JL-09", "multiturn": "JL-10",
+}
+
+
 @dataclass
 class HeartResult:
     decision: str
@@ -52,6 +61,7 @@ class HeartResult:
     resources: list[str] = field(default_factory=list)
     keys_reflection: list[tuple[str, str]] = field(default_factory=list)
     jmgl_version: str = ""
+    laws_via_classifier: bool = False     # law inferred from the classifier's category, not a keyword rule
 
 
 @lru_cache(maxsize=1)
@@ -138,8 +148,10 @@ def evaluate(action: str, history: list[str] | None = None, *,
         except Exception as exc:
             res.grace_note = f"Grace Force is installed but errored ({type(exc).__name__}); showing the ensemble verdict."
     elif not res.grace_available:
-        res.grace_note = ("Grace Force is not in the installed JMGL version (it is still under review and not yet merged "
-                          "into JMGL main). The ensemble verdict is final. See README to pin a Grace-enabled version.")
+        res.grace_note = ("This JMGL install has no Grace Force gate (older version?). The ensemble verdict is final. "
+                          "Install the version pinned in requirements.txt to enable it.")
+    elif not use_grace:
+        res.grace_note = "Grace Force gate turned off; showing the ensemble verdict."
     elif force_rules_only:
         res.grace_note = "Grace Force skipped in rules-only mode."
 
@@ -147,6 +159,9 @@ def evaluate(action: str, history: list[str] | None = None, *,
     ids = law_ids_in(f"{res.rule_id} {ens.rule_id}")
     if res.decision != "ALLOW":
         ids = [i for i in ids if i != "JL-00"]
+    if not ids and res.decision != "ALLOW" and res.classifier_category in CATEGORY_TO_LAW:
+        ids = [CATEGORY_TO_LAW[res.classifier_category]]
+        res.laws_via_classifier = True
     res.laws = [{"id": i, "statement": laws.get(i, "(law text not found)")} for i in ids]
 
     res.rewrite = getattr(final, "suggested_modification", None) or getattr(ens, "suggested_modification", None)

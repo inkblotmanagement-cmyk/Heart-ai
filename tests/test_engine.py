@@ -64,12 +64,11 @@ def test_grace_absent_is_graceful(monkeypatch):
     monkeypatch.setattr(H, "grace_available", lambda: False)
     r = H.evaluate(BENIGN)
     assert r.decision == "ALLOW" and r.grace_gate_score is None
-    assert "not in the installed JMGL" in r.grace_note
+    assert "no Grace Force gate" in r.grace_note
 
 
 def test_grace_used_when_installed():
-    if not H.grace_available():
-        pytest.skip("installed JMGL has no Grace Force (pinned to main)")
+    assert H.grace_available(), "the pinned JMGL (9d0eeed) ships Grace Force"
     r = H.evaluate(BENIGN)
     assert r.grace_gate_score is not None and r.grace_gate_score >= r.grace_threshold
 
@@ -83,3 +82,21 @@ def test_history_is_passed_and_examples_run():
 def test_empty_action_rejected():
     with pytest.raises(ValueError):
         H.evaluate("   ")
+
+
+def test_grace_gate_is_on_by_default_and_decisive():
+    r = H.evaluate(PHISH)
+    assert r.grace_gate_score is not None and r.grace_gate_score < r.grace_threshold
+    assert r.decision == "BLOCK"
+
+
+def test_former_example_mistakes_are_fixed_in_pinned_version():
+    by_label = {lab: (a, h) for lab, a, h in H.EXAMPLES}
+    a, h = by_label["Benign: lesson on spotting scam emails"]
+    assert H.evaluate(a, h).decision == "ALLOW"
+    a, h = by_label["Multi-turn: harm split into steps"]
+    r = H.evaluate(a, h)
+    assert r.decision in ("BLOCK", "ESCALATE")
+    if r.laws_via_classifier:  # classifier-only catch still names the matching law and keys
+        assert [x["id"] for x in r.laws] == ["JL-10"]
+        assert [k for k, _ in r.keys_reflection] == ["Vision", "Perseverance", "Wisdom"]
