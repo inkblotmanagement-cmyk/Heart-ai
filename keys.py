@@ -1,55 +1,92 @@
-"""The 10 Keys: Heart AI's values framework, mapped onto the JMGL laws.
+"""The official 10 Keys, and an editorial lookup relating them to the JMGL laws.
 
-The 10 Keys (Vision, Faith, Courage, Love, Truth, Perseverance, Humility,
-Wisdom, Service, Unity) come from Terrance Darnell Jackson's Jackson 10 Key
-Moral Code. They are a *values framework* for people, not a trained model.
+The 10 Keys are from Terrance Darnell Jackson's (c) business materials, "Get Rich
+and Grow Wealth" and "Pinch Pennies for Profits(c)". They are motivational
+leadership, productivity, and financial-habit principles for people. They are
+NOT software laws and not a trained model. JMGL's software laws (JL-00..JL-10,
+in JMGL spec/laws.json) are separate.
 
-KEY_TO_LAWS is a plain, hand-written, deterministic mapping showing which of the
-JMGL working laws (JL-00..JL-10, see JMGL spec/laws.json) express each key in
-practice. No neural network has "absorbed" these keys; the mapping is an
-editorial reading of the laws, open to the founder's review and revision.
+KEY_TO_LAWS is a hand-written, clearly labeled *editorial* lookup that shows where
+a key relates thematically to a JMGL law. Some keys have no direct law and say so
+(no forced links). Laws no key relates to are listed in UNMAPPED_LAWS.
 """
 from __future__ import annotations
 
 import re
 
+ATTRIBUTION = ("The 10 Keys © Terrance Darnell Jackson, from his \"Get Rich and Grow Wealth\" and "
+               "\"Pinch Pennies for Profits©\" materials.")
+
+# Exact official titles, in order (Key 1..Key 10).
 KEYS: tuple[str, ...] = (
-    "Vision", "Faith", "Courage", "Love", "Truth",
-    "Perseverance", "Humility", "Wisdom", "Service", "Unity",
+    "Invest money to win people and establish financial longevity.",
+    "Prepare to market the world and expand capital base.",
+    "Learn how to be a winner, build winning relationships, and secure investors.",
+    "Use time to make money and gain knowledge of value.",
+    "Manage anger and stress through healthy living and good nutrition.",
+    "Faith is necessary for perseverance; this is your cash flow.",
+    "Conserve water / value; this is your energy.",
+    "Master your emotions / mistakes; this is your joy.",
+    "Achieve financial and personal goals; this is your success.",
+    "Observe how fragile the mind is.",
 )
 
-# A one-line meaning for each key, as it applies to judging an AI action.
-KEY_MEANING: dict[str, str] = {
-    "Vision": "Look at where the whole task leads, not just the next step.",
-    "Faith": "Keep the trust people place in you; never exploit it.",
-    "Courage": "Hold to the ethics check even under pressure, role-play, or claimed authority.",
-    "Love": "Protect the vulnerable and meet people in crisis with compassion.",
-    "Truth": "Do not deceive people, investors, or the evaluator.",
-    "Perseverance": "Keep checking across the whole conversation; staged harm is still harm.",
-    "Humility": "Respect other people's autonomy and hand hard cases to real humans.",
-    "Wisdom": "See through disguises and proxies, and help with education and protection.",
-    "Service": "When nothing harmful is intended, actually help the person.",
-    "Unity": "Do not quietly exclude people; treat everyone by the same fair criteria.",
-}
+# Short explanation of each key, from the same materials.
+KEY_MEANING: dict[str, str] = dict(zip(KEYS, (
+    "Direct resources toward relationships, customer satisfaction, and reputation; goodwill outlasts short-term transactions.",
+    "Scale skills and products beyond one local market, so you are less exposed to local recessions.",
+    "Become someone others choose to support.",
+    "Treat time as a resource for earning and learning; knowledge becomes service.",
+    "Physical and mental condition sustain confidence and clear vision.",
+    "Vision begins as faith; persistence plus collaboration builds clientele.",
+    "Protect physical and mental energy, hydration, and focus.",
+    "Control reactions and learn from errors.",
+    "Reach the financial and personal goals you set.",
+    "Emotions can cause damage or loss; counter them daily with healthy living and nutrition.",
+), strict=True))
 
-# Key -> JMGL law ids that express it. Every key maps to at least one law and
-# every law JL-00..JL-10 is covered by at least one key (enforced by tests).
-KEY_TO_LAWS: dict[str, tuple[str, ...]] = {
-    "Vision": ("JL-10", "JL-00"),
-    "Faith": ("JL-01", "JL-02"),
-    "Courage": ("JL-05", "JL-09"),
-    "Love": ("JL-08", "JL-03"),
-    "Truth": ("JL-01", "JL-07", "JL-09"),
-    "Perseverance": ("JL-10", "JL-05"),
-    "Humility": ("JL-04", "JL-08"),
-    "Wisdom": ("JL-06", "JL-10", "JL-00"),
-    "Service": ("JL-00", "JL-08"),
-    "Unity": ("JL-06", "JL-03"),
-}
+# Editorial lookup: key -> related JMGL laws. Empty tuple = no direct law.
+KEY_TO_LAWS: dict[str, tuple[str, ...]] = dict(zip(KEYS, (
+    ("JL-01", "JL-03", "JL-06"),
+    (),
+    ("JL-01", "JL-07"),
+    ("JL-00",),
+    ("JL-08",),
+    (),
+    (),
+    ("JL-08", "JL-05", "JL-09"),
+    (),
+    ("JL-08",),
+), strict=True))
+
+# Why each link was drawn (or why there is none).
+KEY_NOTES: dict[str, str] = dict(zip(KEYS, (
+    "Winning people means earning trust: no deception (JL-01), no exploiting vulnerable people (JL-03), "
+    "and fair, dignified treatment of everyone (JL-06).",
+    "No direct JMGL law. Expanding into new markets is a business strategy; JMGL has no rule about it.",
+    "Securing investors honestly: no misleading claims (JL-01) and no hyping an asset to deceive investors (JL-07).",
+    "Knowledge becomes service: JMGL's default is to help, especially with educational purposes (JL-00).",
+    "Stress and well-being: when someone may be in crisis, JMGL connects them to human help (JL-08).",
+    "No direct JMGL law. Faith, persistence, and cash flow are personal and business principles.",
+    "No direct JMGL law. Protecting your own energy and focus is a personal health habit.",
+    "Mastering reactions and mistakes: hard cases go to a real person (JL-08), and pressure, role-play, or "
+    "claimed authority doesn't override the check (JL-05, JL-09).",
+    "No direct JMGL law. Personal and financial goals are yours to set; JMGL only checks the actions taken.",
+    "The fragile mind: crisis and self-harm signals are escalated to people with resources such as 988 (JL-08).",
+), strict=True))
 
 ALL_LAW_IDS: tuple[str, ...] = tuple(f"JL-{i:02d}" for i in range(11))
+UNMAPPED_KEYS: tuple[str, ...] = tuple(k for k in KEYS if not KEY_TO_LAWS[k])
+UNMAPPED_LAWS: tuple[str, ...] = tuple(
+    law for law in ALL_LAW_IDS if not any(law in laws for laws in KEY_TO_LAWS.values()))
+# Expected: JL-02 (others' credentials/data), JL-04 (stalking), JL-10 (staged harm across turns).
 
 _LAW_RE = re.compile(r"JL-\d{2}")
+
+
+def key_label(key: str) -> str:
+    """'Key 5: Manage anger and stress ...'"""
+    return f"Key {KEYS.index(key) + 1}: {key}"
 
 
 def law_ids_in(text: str | None) -> list[str]:
@@ -62,7 +99,7 @@ def law_ids_in(text: str | None) -> list[str]:
 
 
 def laws_to_keys() -> dict[str, list[str]]:
-    """Inverse mapping: law id -> keys that relate to it."""
+    """Inverse lookup: law id -> keys related to it (may be empty)."""
     out: dict[str, list[str]] = {law: [] for law in ALL_LAW_IDS}
     for key, laws in KEY_TO_LAWS.items():
         for law in laws:
@@ -71,23 +108,17 @@ def laws_to_keys() -> dict[str, list[str]]:
 
 
 def keys_for_laws(law_ids: list[str]) -> list[str]:
-    """Keys reflected by a set of triggered laws, in canonical 10-Key order."""
+    """Keys related to a set of triggered laws, in Key 1..10 order."""
     wanted = set(law_ids)
     return [k for k in KEYS if wanted.intersection(KEY_TO_LAWS[k])]
 
 
 def reflection(decision: str, law_ids: list[str]) -> list[tuple[str, str]]:
-    """Deterministic 'Keys reflection' for a decision: (key, explanation) pairs.
+    """Deterministic 'Keys reflection': (key, explanation) pairs from the editorial lookup.
 
     This is a lookup from the triggered laws, not a judgment by a model.
     """
     keys = keys_for_laws(law_ids)
     if not keys and decision == "ALLOW":
         keys = keys_for_laws(["JL-00"])
-    verb = {
-        "ALLOW": "Helping here reflects",
-        "BLOCK": "Refusing here upholds",
-        "MODIFY": "Changing the action upholds",
-        "ESCALATE": "Handing this to a person reflects",
-    }.get(decision, "This decision relates to")
-    return [(k, f"{verb} {k}: {KEY_MEANING[k]}") for k in keys]
+    return [(k, f"{key_label(k)} ({KEY_NOTES[k]})") for k in keys]

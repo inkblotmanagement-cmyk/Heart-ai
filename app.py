@@ -8,7 +8,7 @@ from __future__ import annotations
 import streamlit as st
 
 import heart_engine as H
-from keys import KEY_MEANING, KEY_TO_LAWS, KEYS, laws_to_keys
+from keys import ATTRIBUTION, KEY_MEANING, KEY_NOTES, KEY_TO_LAWS, KEYS, UNMAPPED_LAWS, key_label, laws_to_keys
 
 JMGL_URL = "https://github.com/inkblotmanagement-cmyk/JacksonMoralGovernanceLayer"
 BADGE = {"ALLOW": "🟢", "BLOCK": "🔴", "MODIFY": "🟠", "ESCALATE": "🟣"}
@@ -32,7 +32,7 @@ def _warm() -> bool:
 st.title("❤️ Heart AI")
 st.markdown("**Founder: Terrance Darnell Jackson** · Mindful Oracle LLC")
 st.caption("Check a proposed AI action against the Jackson Moral Governance Layer (JMGL) and see which of "
-           "the 10 Keys the decision reflects. Pilot-stage software: not AGI or superintelligence, and "
+           "Terrance Darnell Jackson's 10 Keys relate to the decision. Pilot-stage software: not AGI or superintelligence, and "
            "every serious decision still needs human review.")
 
 tab_check, tab_keys, tab_about = st.tabs(["Check an AI action", "The 10 Keys", "About & limitations"])
@@ -97,25 +97,31 @@ with tab_check:
                 for line in r.resources:
                     st.markdown(f"- {line}")
 
-            st.markdown("**Keys reflection** (a fixed lookup from the triggered laws, not a model's judgment)")
+            st.markdown("**Keys reflection** (an editorial lookup from the triggered laws, not a model's judgment)")
             for _, text in r.keys_reflection:
                 st.markdown(f"- {text}")
             if not r.keys_reflection:
-                st.markdown("- No key mapping for this rule id.")
+                st.markdown("- No key is related to this rule in the editorial lookup.")
 
 with tab_keys:
-    st.markdown("The **10 Keys** are Terrance Darnell Jackson's values framework. Heart AI does not have a model "
-                "that has *absorbed* them. Instead, each key is linked by hand to the JMGL laws that put it into "
-                "practice, so you can see the values behind every decision.")
+    st.markdown("**The 10 Keys** are motivational leadership, productivity, and financial-habit principles for people. "
+                "They are separate from JMGL's software laws. No model here has *absorbed* them. The links below are "
+                "an **editorial lookup** showing where a key relates thematically to a JMGL law. Some keys have no "
+                "direct law, and the lookup says so.")
+    st.caption(ATTRIBUTION)
     laws = H.load_laws()
     for k in KEYS:
-        with st.expander(f"**{k}**: {KEY_MEANING[k]}"):
+        with st.expander(f"**{key_label(k)}**"):
+            st.markdown(KEY_MEANING[k])
+            st.markdown(f"*Relation to JMGL (editorial):* {KEY_NOTES[k]}")
             for lid in KEY_TO_LAWS[k]:
                 st.markdown(f"- **{lid}**: {laws.get(lid, '')}")
     st.markdown("**By law**")
     inv = laws_to_keys()
-    st.table([{"law": lid, "statement": laws.get(lid, ""), "keys": ", ".join(inv.get(lid, []))}
+    st.table([{"law": lid, "statement": laws.get(lid, ""),
+               "related keys": ", ".join(f"Key {KEYS.index(k) + 1}" for k in inv.get(lid, [])) or "none (no direct key)"}
               for lid in sorted(laws)])
+    st.caption(f"Laws with no related key: {', '.join(UNMAPPED_LAWS)}.")
 
 with tab_about:
     st.markdown(f"""
@@ -124,7 +130,7 @@ proposed AI action against 11 written laws plus a small learned classifier, and 
 MODIFY, or ESCALATE with the reason.
 
 **What it is not:** it is **not AGI or artificial superintelligence**, and no model here has absorbed the
-10 Keys. It is a pilot-stage safety filter with known error rates.
+10 Keys (they are principles for people, linked to the laws by an editorial lookup). It is a pilot-stage safety filter with known error rates.
 
 **Published results for the pinned JMGL version** (JMGL commit `9d0eeed`, all on held-out test sets
 that were not used for tuning).
