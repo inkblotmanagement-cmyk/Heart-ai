@@ -4,7 +4,7 @@
 
 Heart AI is a small, working web app that checks a proposed AI action against the
 [Jackson Moral Governance Layer (JMGL)](https://github.com/inkblotmanagement-cmyk/JacksonMoralGovernanceLayer)
-and shows which of the **10 Keys** the decision reflects.
+and shows how Terrance Darnell Jackson's **10 Keys** relate to the decision.
 
 > **Status: pilot-stage.** Heart AI is **not AGI or artificial superintelligence**. No model here has
 > "absorbed" the 10 Keys. It is a front end for a policy engine with published, imperfect accuracy,
@@ -27,26 +27,42 @@ and shows which of the **10 Keys** the decision reflects.
 
 ## The 10 Keys
 
-Vision, Faith, Courage, Love, Truth, Perseverance, Humility, Wisdom, Service, Unity.
+The 10 Keys © Terrance Darnell Jackson, from his "Get Rich and Grow Wealth" and "Pinch Pennies for Profits©" materials.
 
-They are a **values framework for people**. [`keys.py`](keys.py) links each key, by hand, to the JMGL laws that
-put it into practice. The "Keys reflection" is a fixed lookup from the triggered laws, not a model's judgment.
+1. **Invest money to win people and establish financial longevity.** Direct resources toward relationships, customer satisfaction, and reputation; goodwill outlasts short-term transactions.
+2. **Prepare to market the world and expand capital base.** Scale skills and products beyond one local market, so you are less exposed to local recessions.
+3. **Learn how to be a winner, build winning relationships, and secure investors.** Become someone others choose to support.
+4. **Use time to make money and gain knowledge of value.** Treat time as a resource for earning and learning; knowledge becomes service.
+5. **Manage anger and stress through healthy living and good nutrition.** Physical and mental condition sustain confidence and clear vision.
+6. **Faith is necessary for perseverance; this is your cash flow.** Vision begins as faith; persistence plus collaboration builds clientele.
+7. **Conserve water / value; this is your energy.** Protect physical and mental energy, hydration, and focus.
+8. **Master your emotions / mistakes; this is your joy.** Control reactions and learn from errors.
+9. **Achieve financial and personal goals; this is your success.** Reach the financial and personal goals you set.
+10. **Observe how fragile the mind is.** Emotions can cause damage or loss; counter them daily with healthy living and nutrition.
 
-| Key | JMGL laws |
-|---|---|
-| Vision | JL-10, JL-00 |
-| Faith | JL-01, JL-02 |
-| Courage | JL-05, JL-09 |
-| Love | JL-08, JL-03 |
-| Truth | JL-01, JL-07, JL-09 |
-| Perseverance | JL-10, JL-05 |
-| Humility | JL-04, JL-08 |
-| Wisdom | JL-06, JL-10, JL-00 |
-| Service | JL-00, JL-08 |
-| Unity | JL-06, JL-03 |
+The 10 Keys are **motivational leadership, productivity, and financial-habit principles for people**. They are
+separate from JMGL's software laws (JL-00..JL-10), and no model here has absorbed them.
 
-Tests check that all 10 keys are mapped and every law JL-00..JL-10 is covered. The mapping is an editorial
-reading of the laws and is open to the founder's revision.
+[`keys.py`](keys.py) holds a hand-written **editorial lookup** showing where a key relates thematically to a JMGL law,
+with a one-line reason for each link. The "Keys reflection" in the app is a fixed lookup from the triggered laws, not a
+model's judgment. Some keys have no direct law, and the lookup says so instead of forcing a link.
+
+| Key | Title | Related JMGL laws (editorial) |
+|---|---|---|
+| 1 | Invest money to win people and establish financial longevity. | JL-01, JL-03, JL-06 |
+| 2 | Prepare to market the world and expand capital base. | none (no direct law) |
+| 3 | Learn how to be a winner, build winning relationships, and secure investors. | JL-01, JL-07 |
+| 4 | Use time to make money and gain knowledge of value. | JL-00 |
+| 5 | Manage anger and stress through healthy living and good nutrition. | JL-08 |
+| 6 | Faith is necessary for perseverance; this is your cash flow. | none (no direct law) |
+| 7 | Conserve water / value; this is your energy. | none (no direct law) |
+| 8 | Master your emotions / mistakes; this is your joy. | JL-08, JL-05, JL-09 |
+| 9 | Achieve financial and personal goals; this is your success. | none (no direct law) |
+| 10 | Observe how fragile the mind is. | JL-08 |
+
+Laws with no related key: JL-02, JL-04, JL-10 (others' credentials/data, stalking, and harm staged across turns).
+Tests check the exact titles, that every law is either related to a key or listed as unrelated, and that no old
+single-word key names remain. The lookup is open to the founder's revision.
 
 ## Published results (pinned JMGL version)
 
@@ -116,7 +132,7 @@ Grace Force ships in the pinned commit, so nothing extra is needed. To move to a
 
 - `app.py`: the Streamlit app (renamed from `App.py`)
 - `heart_engine.py`: testable wrapper around JMGL (ensemble, rules-only fallback, optional Grace gate)
-- `keys.py`: the 10 Keys and their mapping to JMGL laws
+- `keys.py`: the official 10 Keys and their editorial lookup to JMGL laws
 - `tests/`: pytest suite (mapping coverage, clear-case decisions, fallback paths, app smoke test)
 
 ## What changed from the first version
@@ -126,7 +142,8 @@ and the outcome on screen depended only on the Faith slider. Its "UBI simulator"
 ($100K/year to 8 billion people, poverty at 0% in 7 days) whenever two sliders were above 0.9; it did not
 model any economics. The old README described it as the first artificial superintelligence and showed an
 "Ethical Alignment 1.00" badge that no test measured. This version replaces all of that with real evaluation
-by JMGL and keeps the 10 Keys as the values framework.
+by JMGL. The 10 Keys are now Terrance Darnell Jackson's official business Keys, shown as principles for people
+alongside the software laws, not as model inputs.
 
 ## Vision (aspiration, not a current capability)
 
